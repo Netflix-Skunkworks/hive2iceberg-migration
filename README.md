@@ -63,6 +63,6 @@ Workflow:
             - local=false
             - dryrun=false
           class: ${migration_main}
-          script: $S3{${migration_jar}}
+          script: ${migration_jar}
           version: ${migration_spark_version}
         type: Spark     
