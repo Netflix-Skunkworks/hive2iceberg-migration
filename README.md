@@ -35,3 +35,34 @@ CREATE TABLE `jobs` (
   PRIMARY KEY (`task_id`),
   UNIQUE KEY `uniq_name` (`catalog_name`,`db_name`,`tbl_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=452391 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+```
+
+## Modes of operation
+
+Tooling provides five components/(modes of operation): PREPROCESSOR, COMMUNICATOR, MIGRATOR, REVERTER, SHADOWER
+
+Each mode of operation can be a separate scheduled workflow, for an instance, below workflow creates an scheduled instance for PREPROCESSOR:
+```
+Trigger:
+  cron: 0 0 * * * # Means: run everyday at midnight
+  tz: US/Pacific # Means: specified cron is in Pacific Time.
+Workflow:
+  id: hive2iceberg_migration_preprocessor
+  name: hive2iceberg_migration_preprocessor
+  jobs:
+    - job:
+        id: hive_to_iceberg_migration_job
+        genie:
+          tags:
+            - ignore_lineage_usage
+        spark:
+          app_args:
+            - mode=PREPROCESSOR
+            - jobsProcessBatchSize=5000
+            - dbEnv="prod"
+            - local=false
+            - dryrun=false
+          class: ${migration_main}
+          script: $S3{${migration_jar}}
+          version: ${migration_spark_version}
+        type: Spark     
