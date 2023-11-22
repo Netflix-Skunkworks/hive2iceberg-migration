@@ -1,5 +1,7 @@
 # Hive to Iceberg Migration Tooling
 
+Note: This repository is intended to be reference and will not be actively maintained by Netflix.
+
 ## Migration queue schema
 
 Migration tooling uses `jobs` table as the queue. The table is created using the following SQL command:
