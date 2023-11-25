@@ -54,9 +54,6 @@ Workflow:
   jobs:
     - job:
         id: hive_to_iceberg_migration_job
-        genie:
-          tags:
-            - ignore_lineage_usage
         spark:
           app_args:
             - mode=PREPROCESSOR
