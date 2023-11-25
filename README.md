@@ -15,35 +15,32 @@ Migration tooling uses `jobs` table as the queue. The table is created using the
 
 ```sql
 CREATE TABLE `jobs` (
-  `task_id` int NOT NULL AUTO_INCREMENT,
-  `catalog_name` varchar(30) NOT NULL,
-  `db_name` varchar(255) NOT NULL,
-  `tbl_name` varchar(255) NOT NULL,
-  `stg_format` varchar(30) DEFAULT NULL,
-  `data_category` varchar(255) NOT NULL DEFAULT 'UNKNOWN',
-  `tbl_owners` json DEFAULT NULL,
-  `downstream_users` json DEFAULT NULL,
-  `to_be_processed` tinyint(1) NOT NULL DEFAULT '0',
-  `in_process` tinyint(1) NOT NULL DEFAULT '0',
-  `state` varchar(30) NOT NULL DEFAULT 'Undefined',
-  `desired_state` varchar(30) NOT NULL DEFAULT 'Undefined',
-  `initial_gap_days` int NOT NULL DEFAULT '14',
-  `probation_gap_days` int NOT NULL DEFAULT '0',
-  `comm_level1_date` timestamp NULL DEFAULT NULL,
-  `comm_level2_date` timestamp NULL DEFAULT NULL,
-  `comm_level3_date` timestamp NULL DEFAULT NULL,
-  `shadow_watermark` mediumtext,
-  `migration_paused` tinyint(1) NOT NULL DEFAULT '0',
-  `pause_reason` varchar(512) NOT NULL DEFAULT 'None',
-  `run_id` varchar(4096) DEFAULT NULL,
-  `shadow_status` varchar(30) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `last_updated_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `deferred_date` timestamp NULL DEFAULT NULL,
-  `reverter_run_id` varchar(255) DEFAULT NULL,
-  PRIMARY KEY (`task_id`),
-  UNIQUE KEY `uniq_name` (`catalog_name`,`db_name`,`tbl_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=452391 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `task_id` int NOT NULL AUTO_INCREMENT, -- Unique identifier for each task
+  `catalog_name` varchar(30) NOT NULL, -- Name of the catalog
+  `db_name` varchar(255) NOT NULL, -- Name of the database
+  `tbl_name` varchar(255) NOT NULL, -- Name of the table
+  `stg_format` varchar(30) DEFAULT NULL, -- Storage format of the table
+  `data_category` varchar(255) NOT NULL DEFAULT 'UNKNOWN', -- Category of the data
+  `tbl_owners` json DEFAULT NULL, -- JSON array of table owners
+  `downstream_users` json DEFAULT NULL, -- JSON array of downstream users
+  `to_be_processed` tinyint(1) NOT NULL DEFAULT '0', -- Flag indicating if the job is ready to be processed
+  `in_process` tinyint(1) NOT NULL DEFAULT '0', -- Flag indicating if the job is currently being processed
+  `state` varchar(30) NOT NULL DEFAULT 'Undefined', -- Current state of the job
+  `desired_state` varchar(30) NOT NULL DEFAULT 'Undefined', -- Desired state of the job
+  `initial_gap_days` int NOT NULL DEFAULT '14', -- Initial gap days before processing the job
+  `probation_gap_days` int NOT NULL DEFAULT '0', -- Probation gap days before processing the job
+  `comm_level1_date` timestamp NULL DEFAULT NULL, -- Timestamp of level 1 communication
+  `comm_level2_date` timestamp NULL DEFAULT NULL, -- Timestamp of level 2 communication
+  `comm_level3_date` timestamp NULL DEFAULT NULL, -- Timestamp of level 3 communication
+  `shadow_watermark` mediumtext, -- Watermark for shadowing process
+  `migration_paused` tinyint(1) NOT NULL DEFAULT '0', -- Flag indicating if the migration is paused
+  `pause_reason` varchar(512) NOT NULL DEFAULT 'None', -- Reason for pausing the migration
+  `shadow_status` varchar(30) DEFAULT NULL, -- Status of the shadowing process
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP, -- Timestamp when the job was created
+  `last_updated_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, -- Timestamp when the job was last updated
+  PRIMARY KEY (`task_id`), -- Primary key of the table
+  UNIQUE KEY `uniq_name` (`catalog_name`,`db_name`,`tbl_name`) -- Unique key constraint on catalog_name, db_name, and tbl_name
+) ENGINE=InnoDB AUTO_INCREMENT=452391 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci; -- Table engine and character set details
 ```
 
 ### Preprocessor
