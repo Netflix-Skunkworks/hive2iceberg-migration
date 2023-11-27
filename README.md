@@ -1,6 +1,42 @@
 # Hive to Iceberg Migration Tooling
 
-Note: This repository is intended to be reference and will not be actively maintained by Netflix.
+Note: This repository is intended to be a reference for broader community and will not be actively maintained by Netflix.
+
+## Purpose
+
+The key purposed of this tool is to (bulk) migrate tables in Hive table format into an Iceberg table format.
+
+## Use
+
+This tool uses few Netflix's internal services such as Lineage Logging, Metacat, Netflix Data Catalog, but we believe these can be replaced by OSS alternatives or similar systems that your organization could be using.
+
+Here we present few pointers to use this tool. The Hive tables that need to be migrated can be ingested into migration queue by listing the tables in ```src/main/scala/com/netflix/migration/utils/jobs.txt``` and by running ```src/main/scala/com/netflix/migration/utils/IngestJobs.scala```.
+
+Once jobs are ingested. Using daily (or any other schedule granularity) scheduled workflows, invoke different components (PREPROCESSOR, COMMUNICATOR, MIGRATOR, SHADOWER, REVERTER). Each workflow could correspond to a different component.
+
+For an instance, below workflow creates an scheduled instance for PREPROCESSOR:
+```
+Trigger:
+  cron: 0 0 * * * # Means: run everyday at midnight
+  tz: US/Pacific # Means: specified cron is in Pacific Time.
+Workflow:
+  id: hive2iceberg_migration_preprocessor
+  name: hive2iceberg_migration_preprocessor
+  jobs:
+    - job:
+        id: hive_to_iceberg_migration_job
+        spark:
+          app_args:
+            - mode=PREPROCESSOR
+            - jobsProcessBatchSize=5000
+            - dbEnv="prod"
+            - local=false
+            - dryrun=false
+          class: ${migration_main}
+          script: ${migration_jar}
+          version: ${migration_spark_version}
+        type: Spark
+```  
 
 ## Design
 
@@ -62,31 +98,3 @@ If the Hive table watermark does not match the current snapshot_id of the Iceber
 ### Reverter
 
 Reverter is a feature that allows users or migration administrators to revert the primary table to Hive if they encounter issues with the newly created Iceberg table during the probation period. Reverter will not allow user requests if the table migration is in-process (where in_process is set to 1) and it is not in the probation period. When Reverter is activated during the probation period, writes to the Iceberg table are first blocked. Then, the shadow tool is used to update the Hive table (with the _hive suffix) with the newly written data in the Iceberg table. The Iceberg table name is then appended with the _iceberg suffix, while the _hive suffix is removed from the Hive table, making it the primary table. Finally, writes to the primary table are unblocked, while the Iceberg table with the _iceberg suffix is deleted and the migration_paused field is set to true.
-
-
-## Modes of operation
-
-Tooling provides five components/(modes of operation): PREPROCESSOR, COMMUNICATOR, MIGRATOR, REVERTER, SHADOWER
-
-Each mode of operation can be a separate scheduled workflow, for an instance, below workflow creates an scheduled instance for PREPROCESSOR:
-```
-Trigger:
-  cron: 0 0 * * * # Means: run everyday at midnight
-  tz: US/Pacific # Means: specified cron is in Pacific Time.
-Workflow:
-  id: hive2iceberg_migration_preprocessor
-  name: hive2iceberg_migration_preprocessor
-  jobs:
-    - job:
-        id: hive_to_iceberg_migration_job
-        spark:
-          app_args:
-            - mode=PREPROCESSOR
-            - jobsProcessBatchSize=5000
-            - dbEnv="prod"
-            - local=false
-            - dryrun=false
-          class: ${migration_main}
-          script: ${migration_jar}
-          version: ${migration_spark_version}
-        type: Spark     
