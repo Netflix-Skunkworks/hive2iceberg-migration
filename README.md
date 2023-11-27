@@ -50,7 +50,8 @@ Preprocessor is a process that selects a job with to_be_processed set to 0 and i
 ### Migrator
 
 If it is determined that two weeks have passed since level 1 communication was sent for a specific job/table, Migrator will mark the in_process flag as 1 and reset the to_be_processed flag to 0. The migration of that table then begins until the desired_state and state are both set to WritesUnblocked, which starts the probation period marked by Communicator sending level 2 communication. After two weeks have passed since level 2 communication was sent, Migrator completes the migration by dropping the original Hive table with the _hive suffix. At this point, both the state and desired_state become equal to the HiveDropped state and reset the in_process flag to 0.
-Communicator
+
+### Communicator
 
 If the to_be_processed flag is set to 1, the Communicator workflow will send Level 1 communication to notify users that the table will be migrated in 1-2 weeks. This sets the date for comm_level1_date. After 1-2 weeks, the migration tool will select the table for migration and set the in_process flag to 1. The migration of the table will then begin. Once the table is migrated, if the desired_state and state are both set to WritesUnblocked, the Communicator will send Level 2 communication to notify users that the probation period has begun. This sets the date for comm_level2_date. After two weeks, the migration tool will delete the original Hive table. If the state and desired_state are both set to HiveDropped at this point, the Communicator will send Level 3 communication to notify users that the migration is complete and set the comm_level3_date.
 
