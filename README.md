@@ -12,13 +12,17 @@ This tool uses few Netflix's internal services such as Lineage Logging, Metacat,
 
 Here we present few pointers to use this tool. The Hive tables that need to be migrated can be ingested into migration queue by listing the tables in ```src/main/scala/com/netflix/migration/utils/jobs.txt``` and by running ```src/main/scala/com/netflix/migration/utils/IngestJobs.scala```.
 
-Once jobs are ingested. Using daily (or any other schedule granularity) scheduled workflows, invoke different components (PREPROCESSOR, COMMUNICATOR, MIGRATOR, SHADOWER, REVERTER). Each workflow could correspond to a different component.
+Once jobs are ingested, using daily (or any other schedule granularity) scheduled workflows, invoke different components (PREPROCESSOR, COMMUNICATOR, MIGRATOR, SHADOWER, REVERTER). Each workflow could correspond to a different component.
 
 For an instance, below workflow creates an scheduled instance for PREPROCESSOR:
 ```
 Trigger:
   cron: 0 0 * * * # Means: run everyday at midnight
   tz: US/Pacific # Means: specified cron is in Pacific Time.
+Variables:
+  migration_jar: ../build/libs/hive2iceberg-migration-all.jar
+  migration_main: com.netflix.migration.MigrationRunner
+  migration_spark_version: 3.5
 Workflow:
   id: hive2iceberg_migration_preprocessor
   name: hive2iceberg_migration_preprocessor
