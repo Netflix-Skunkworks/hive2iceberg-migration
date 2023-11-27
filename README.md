@@ -4,7 +4,7 @@ Note: This repository is intended to be a reference for broader community and wi
 
 ## Purpose
 
-The key purposed of this tool is to (bulk) migrate tables in Hive table format into an Iceberg table format.
+The key purpose of this tool is to (bulk) migrate tables in Hive table format into an Iceberg table format.
 
 ## Use
 
